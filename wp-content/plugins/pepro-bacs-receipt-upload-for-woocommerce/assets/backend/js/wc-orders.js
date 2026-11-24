@@ -1,0 +1,57 @@
+/*
+ * @Date Created: 2022/08/15 21:03:32
+ * @Last modified by: AmirhpCom <its@amirhp.com>
+ * @Last modified time: 2024/02/04 10:33:40
+ */
+
+(function($) {
+  $(document).ready(function() {
+
+
+    $(document).on("change", "#receipt_upload_status", function() {
+      var me = $(this);
+      me.removeAttr("class").addClass(me.val());
+    });
+
+    $(document).on("click tap", ".changefile", function(e) {
+      e.preventDefault();
+      $("#change_receipt_attachment_id").trigger("click");
+    });
+    $(document).on("click tap", ".removefile", function(e) {
+      e.preventDefault();
+      $("#receipt_uploaded_attachment_id").val("").trigger("change");
+      $("#change_receipt_attachment_id").attr("src", $("#change_receipt_attachment_id").data("def"));
+    });
+    $(document).on("click tap", ".changedate", function(e) {
+      e.preventDefault();
+      $("#receipt_upload_date_uploaded").toggle();
+    });
+
+    $(document).on("click tap", "#change_receipt_attachment_id", function(e) {
+      e.preventDefault();
+      var image_frame;
+      image_frame = wp.media({
+        title: '',
+        multiple: false,
+        library: {}
+      });
+      image_frame.on('select', function() {
+        if (image_frame.state().get('selection').first()) {
+          var selection = image_frame.state().get('selection').first().toJSON();
+          $("#receipt_uploaded_attachment_id").val(selection.id).trigger("change");
+          var src = selection.sizes && selection.sizes.thumbnail ? selection.sizes.thumbnail.url : (selection.sizes && selection.sizes.full ? selection.sizes.full.url : $("#change_receipt_attachment_id").data("def"));
+          $("#change_receipt_attachment_id").attr("src", src);
+        }
+      });
+      image_frame.on('open', function() {
+        var selection = image_frame.state().get('selection');
+        var id = $("#receipt_uploaded_attachment_id").val();
+        if (!id) return;
+        var attachment = wp.media.attachment(id);
+        attachment.fetch();
+        selection.add([attachment]);
+      });
+      image_frame.open();
+    });
+  });
+})(jQuery);
